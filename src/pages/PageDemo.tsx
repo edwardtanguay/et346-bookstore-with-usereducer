@@ -3,6 +3,7 @@ import { useReducer } from "react";
 interface IState {
 	count: number;
 	title: string;
+	history: string[]
 }
 
 interface ICountAction {
@@ -18,6 +19,7 @@ interface ITitleAction {
 const initialState: IState = {
 	count: 0,
 	title: "The useReducer Demo",
+	history: []
 };
 
 const reducer = (state: IState, action: ICountAction | ITitleAction) => {
@@ -25,12 +27,15 @@ const reducer = (state: IState, action: ICountAction | ITitleAction) => {
 	switch (action.type) {
 		case "increment":
 			_state.count += action.payload;
+			_state.history.push(`added ${action.payload}`)
 			break;
 		case "decrement":
 			_state.count -= action.payload;
+			_state.history.push(`subtracted ${action.payload}`)
 			break;
 		case "changeTitle":
 			_state.title = action.payload;
+			_state.history.push(`change title to "${action.payload}"`);
 	}
 	return _state;
 };
@@ -56,7 +61,7 @@ export const PageDemo = () => {
 				</button>
 				<p className="text-2xl mb-3">Count: {state.count}</p>
 			</div>
-			<div className="text-xl">
+			<div className="text-xl mb-3">
 				Title:{" "}
 				<input
 					type="text"
@@ -69,6 +74,14 @@ export const PageDemo = () => {
 						})
 					}
 				/>
+			</div>
+			<div>
+				<h3 className="text-xl mb-3">History:</h3>
+				{state.history.map((item, index) => {
+					return (
+						<p key={index} className="font-mono text-orange-900">{item}</p>
+					)
+				})}
 			</div>
 		</>
 	);
