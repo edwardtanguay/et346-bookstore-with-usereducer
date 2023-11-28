@@ -1,29 +1,43 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useReducer } from "react";
 import { IBook, ICart } from "./interfaces";
 import axios from "axios";
-import { useReducer } from "react";
 
 interface IState {
 	userName: string;
 	books: IBook[];
+	cart: ICart;
 }
 
 const initialState: IState = {
-	userName: '',
-	books: []
-}
+	userName: "",
+	books: [],
+	cart: { items: [] },
+};
 
 interface IUserNameAction {
-	type: "changeUserName"
+	type: "changeUserName";
 	payload: string;
 }
 
 interface IBooksAction {
-	type: "setBooks"
+	type: "setBooks";
 	payload: IBook[];
 }
 
-const reducer = (state: IState, action: IUserNameAction | IBooksAction) => {
+interface ICartAction {
+	type: "setCart";
+	payload: ICart;
+}
+
+interface IBookAction {
+	type: "addBookToCart";
+	payload: IBook;
+}
+
+const reducer = (
+	state: IState,
+	action: IUserNameAction | IBooksAction | ICartAction | IBookAction
+) => {
 	const _state = structuredClone(state);
 	switch (action.type) {
 		case "changeUserName":
@@ -32,15 +46,19 @@ const reducer = (state: IState, action: IUserNameAction | IBooksAction) => {
 		case "setBooks":
 			_state.books = action.payload;
 			break;
+		case "setCart":
+			_state.cart = action.payload;
+			break;
+		case "addBookToCart":
+			_state.cart.items.push(action.payload);
+			break;
 	}
 	return _state;
 };
 
 interface IAppContext {
-	state: IState,
-	dispatch: React.Dispatch<IUserNameAction>,
-	cart: ICart;
-	handleAddBookToCart: (book: IBook) => void;
+	state: IState;
+	dispatch: React.Dispatch<IUserNameAction | IBookAction>;
 }
 
 interface IAppProvider {
@@ -53,29 +71,20 @@ export const AppContext = createContext<IAppContext>({} as IAppContext);
 
 export const AppProvider: React.FC<IAppProvider> = ({ children }) => {
 	const [state, dispatch] = useReducer(reducer, initialState);
-	const [cart, setCart] = useState<ICart>({ items: [] } as ICart);
 
 	useEffect(() => {
 		setTimeout(async () => {
 			const response = await axios.get(booksUrl);
 			const _books = response.data;
-			dispatch({type: 'setBooks', payload: _books})
+			dispatch({ type: "setBooks", payload: _books });
 		}, 2000);
 	}, []);
-
-	const handleAddBookToCart = (book: IBook) => {
-		const _cart = structuredClone(cart);
-		_cart.items.push(book);
-		setCart(_cart);
-	};
 
 	return (
 		<AppContext.Provider
 			value={{
 				state,
 				dispatch,
-				cart,
-				handleAddBookToCart,
 			}}
 		>
 			{children}

@@ -2,12 +2,12 @@ import { useContext } from "react";
 import { AppContext } from "../AppContext";
 
 export const PageCheckout = () => {
-	const { state, cart } = useContext(AppContext);
+	const { state } = useContext(AppContext);
 	return (
 		<>
 			{state.userName && <p>{state.userName}, double check your order!</p>}
 			<div className="mt-4">
-				{cart.items.map(book => {
+				{state.cart.items.map(book => {
 					return (
 						<div className="flex gap-3 items-center mb-3">
 							<img
